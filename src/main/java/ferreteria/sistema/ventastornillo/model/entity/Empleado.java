@@ -59,7 +59,7 @@ public class Empleado {
     @Column(nullable = false, unique = true, length = 30)
     private String username;
 
-    @NotBlank(message = "La password es obligatorio")
+    @NotBlank(message = "La password es obligatoria")
     @Size(min = 8, message = "La password debe ser de almenos 8 caracteres")
     @Column(nullable = false)
     private String password;
