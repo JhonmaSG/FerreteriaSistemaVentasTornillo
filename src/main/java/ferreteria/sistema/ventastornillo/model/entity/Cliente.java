@@ -28,14 +28,14 @@ public class Cliente {
     private UUID id;
 
     @NotBlank(message = "El DNI es obligatorio")
-    @Size(min = 6, max = 11, message = "El DNI debe tener estar entre 6 y 11 caracteres")
+    @Size(min = 6, max = 11, message = "El DNI debe tener entre 6 y 11 caracteres")
     @Column(nullable = false, length = 11, unique = true)
     private String dni;
 
     @NotBlank(message = "Los nombres son obligatorios")
     @Size(max = 255, message = "Los nombres no puede exceder 255 caracteres")
     @Column(nullable = false, length = 255)
-    private String nombre;
+    private String nombres;
 
     @NotBlank(message = "Los apellidos son obligatorios")
     @Size(max = 255, message = "Los apellidos no puede exceder 255 caracteres")
