@@ -17,7 +17,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "ventas")
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Setter
@@ -37,7 +37,7 @@ public class Venta {
     private Empleado empleado;
 
     @NotBlank(message = "El número de serie es obligatorio")
-    @Size(min = 20, message = "El número de serie no puede exceder 20 caracteres")
+    @Size(min = 1, max = 20, message = "El número de serie debe tener entre 1 y 20 caracteres")
     @Column(nullable = false, unique = true, length = 20)
     private String numeroSerie;
 

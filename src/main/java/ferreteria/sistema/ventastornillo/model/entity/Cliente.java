@@ -16,7 +16,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "cliente")
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Setter

@@ -1,10 +1,8 @@
 package ferreteria.sistema.ventastornillo.model.entity;
 
+import ferreteria.sistema.ventastornillo.model.enums.Rol;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -16,7 +14,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "empleado")
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Setter
@@ -58,13 +56,18 @@ public class Empleado {
 
     @NotBlank(message = "El username es obligatorio")
     @Size(min = 5, max = 30, message = "El username debe ser entre 5 y 30 caracteres")
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 30)
     private String username;
 
     @NotBlank(message = "La password es obligatorio")
     @Size(min = 8, message = "La password debe ser de almenos 8 caracteres")
     @Column(nullable = false)
     private String password;
+
+    @NotNull(message = "El rol es obligatorio")
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Rol rol;
 
     @Column(nullable = false)
     private Boolean activo;

@@ -14,7 +14,7 @@ import java.util.UUID;
 @Entity
 @Table(name = "producto")
 @EntityListeners(AuditingEntityListener.class)
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Getter
 @Setter
@@ -30,7 +30,7 @@ public class Producto {
     @Column(nullable = false, length = 255)
     private String nombre;
 
-    @NotBlank(message = "El precio debe ser obligatorio")
+    @NotNull(message = "El precio debe ser obligatorio")
     @DecimalMin(value = "0.01", message = "El precio debe ser mayor a 0")
     @Digits(integer = 10, fraction = 2, message = "El precio maximo es 9999999999.99")
     @Column(nullable = false, precision = 10, scale = 2)
