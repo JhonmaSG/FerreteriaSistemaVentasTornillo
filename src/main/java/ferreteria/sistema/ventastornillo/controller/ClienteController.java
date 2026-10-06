@@ -1,6 +1,8 @@
 package ferreteria.sistema.ventastornillo.controller;
 
+import ferreteria.sistema.ventastornillo.dto.request.ClienteRequest;
 import ferreteria.sistema.ventastornillo.dto.response.ClienteResponse;
+import ferreteria.sistema.ventastornillo.service.ClienteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,14 +29,14 @@ public class ClienteController {
     }
 
     @PostMapping
-    public ResponseEntity<ClienteResponse> createCliente(@Valid @RequestBody ClienteResponse request) {
+    public ResponseEntity<ClienteResponse> createCliente(@Valid @RequestBody ClienteRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(clienteService.createCliente(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ClienteResponse> updateCliente(@PathVariable UUID id, @Valid @RequestBody ClienteResponse request){
+    public ResponseEntity<ClienteResponse> updateCliente(@PathVariable UUID id, @Valid @RequestBody ClienteRequest request){
         return ResponseEntity.ok(clienteService.updateCliente(id, request));
     }
 
