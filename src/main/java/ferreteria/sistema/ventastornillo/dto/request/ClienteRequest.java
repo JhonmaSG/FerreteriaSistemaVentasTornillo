@@ -13,7 +13,6 @@ import lombok.*;
 @Builder
 public class ClienteRequest {
 
-
     @NotBlank(message = "El DNI es obligatorio")
     @Size(min = 6, max = 11, message = "El DNI debe tener entre 6 y 11 caracteres")
     private String dni;
