@@ -46,7 +46,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String getUserFromToken(String token) {
+    public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())
                 .build()
