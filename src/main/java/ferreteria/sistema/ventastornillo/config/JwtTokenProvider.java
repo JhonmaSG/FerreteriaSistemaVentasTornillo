@@ -1,7 +1,8 @@
 package ferreteria.sistema.ventastornillo.config;
 
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -43,5 +44,46 @@ public class JwtTokenProvider {
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public String getUserFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.getSubject();
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<String> getRolesFromToken(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(getSigningKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        return claims.get("roles", List.class);
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(getSigningKey())
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (SecurityException | MalformedJwtException e) {
+            System.out.println("Token invalido: " + e.getMessage());
+        } catch (ExpiredJwtException e) {
+            System.out.println("Token expirado: " + e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            System.out.println("Token no soportado: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("JWT vacío: " + e.getMessage());
+        }
+
+        return false;
     }
 }
