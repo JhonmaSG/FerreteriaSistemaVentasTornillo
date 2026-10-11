@@ -33,7 +33,7 @@ public class Empleado {
     @NotBlank(message = "Los nombres son obligatorios")
     @Size(max = 255, message = "Los nombres no puede exceder 255 caracteres")
     @Column(nullable = false, length = 255)
-    private String nombre;
+    private String nombres;
 
     @NotBlank(message = "Los apellidos son obligatorios")
     @Size(max = 255, message = "Los apellidos no puede exceder 255 caracteres")
