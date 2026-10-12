@@ -2,7 +2,7 @@ package ferreteria.sistema.ventastornillo.service;
 
 import ferreteria.sistema.ventastornillo.dto.request.ClienteRequest;
 import ferreteria.sistema.ventastornillo.dto.response.ClienteResponse;
-import ferreteria.sistema.ventastornillo.exception.BussinessException;
+import ferreteria.sistema.ventastornillo.exception.BusinessException;
 import ferreteria.sistema.ventastornillo.exception.ResourceNotFoundException;
 import ferreteria.sistema.ventastornillo.model.entity.Cliente;
 import ferreteria.sistema.ventastornillo.repository.ClienteRepository;
@@ -37,10 +37,10 @@ public class ClienteService {
     @Transactional
     public ClienteResponse createCliente(ClienteRequest request){
         if(clienteRepository.existsByDni(request.getDni())){
-            throw new BussinessException("Ya existe un cliente con el DNI: " + request.getDni());
+            throw new BusinessException("Ya existe un cliente con el DNI: " + request.getDni());
         }
         if(clienteRepository.existsByEmail(request.getEmail())){
-            throw new BussinessException("Ya existe un cliente con el email: " + request.getEmail());
+            throw new BusinessException("Ya existe un cliente con el email: " + request.getEmail());
         }
 
         Cliente clienteAGuardar = Cliente.builder()

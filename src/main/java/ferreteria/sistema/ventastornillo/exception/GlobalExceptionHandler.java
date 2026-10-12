@@ -23,8 +23,8 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
-    @ExceptionHandler(BussinessException.class)
-    public ResponseEntity<MessageResponse> handleBussinessException(BussinessException ex) {
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<MessageResponse> handleBussinessException(BusinessException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(MessageResponse.builder()
