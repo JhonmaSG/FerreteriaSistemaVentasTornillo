@@ -20,31 +20,31 @@ public class EmpleadoController {
     private final EmpleadoService empleadoService;
 
     @GetMapping
-    public ResponseEntity<List<EmpleadoResponse>> listarTodos() {
+    public ResponseEntity<List<EmpleadoResponse>> getEmpleados() {
         return ResponseEntity.ok(empleadoService.getEmpleados());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmpleadoResponse> obtenerPorId(@PathVariable UUID id) {
+    public ResponseEntity<EmpleadoResponse> getEmpleadoId(@PathVariable UUID id) {
         return ResponseEntity.ok(empleadoService.getEmpleadoId(id));
     }
 
     @PostMapping
-    public ResponseEntity<EmpleadoResponse> crear(@Valid @RequestBody EmpleadoRequest request) {
+    public ResponseEntity<EmpleadoResponse> createEmpleado(@Valid @RequestBody EmpleadoRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(empleadoService.createEmpleado(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EmpleadoResponse> actualizar(
+    public ResponseEntity<EmpleadoResponse> updateEmpleado(
             @PathVariable UUID id,
             @Valid @RequestBody EmpleadoRequest request) {
         return ResponseEntity.ok(empleadoService.updateEmpleado(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteEmpleado(@PathVariable UUID id) {
         empleadoService.deleteEmpleado(id);
         return ResponseEntity.noContent().build();
     }

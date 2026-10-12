@@ -20,31 +20,31 @@ public class ProductoController {
     private final ProductoService productoService;
 
     @GetMapping
-    public ResponseEntity<List<ProductoResponse>> listarTodos() {
+    public ResponseEntity<List<ProductoResponse>> getProductos() {
         return ResponseEntity.ok(productoService.getProductos());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProductoResponse> obtenerPorId(@PathVariable UUID id) {
+    public ResponseEntity<ProductoResponse> getProductoId(@PathVariable UUID id) {
         return ResponseEntity.ok(productoService.getProductoId(id));
     }
 
     @PostMapping
-    public ResponseEntity<ProductoResponse> crear(@Valid @RequestBody ProductoRequest request) {
+    public ResponseEntity<ProductoResponse> createProducto(@Valid @RequestBody ProductoRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(productoService.createProducto(request));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ProductoResponse> actualizar(
+    public ResponseEntity<ProductoResponse> updateProducto(
             @PathVariable UUID id,
             @Valid @RequestBody ProductoRequest request) {
         return ResponseEntity.ok(productoService.updateProducto(id, request));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteProducto(@PathVariable UUID id) {
         productoService.deleteProducto(id);
         return ResponseEntity.noContent().build();
     }
