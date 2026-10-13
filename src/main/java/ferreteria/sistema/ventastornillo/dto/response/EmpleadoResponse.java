@@ -14,7 +14,7 @@ public class EmpleadoResponse {
 
     private UUID id;
     private String dni;
-    private String nombre;
+    private String nombres;
     private String apellidos;
     private String telefono;
     private String email;
