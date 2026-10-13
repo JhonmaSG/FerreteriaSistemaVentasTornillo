@@ -48,7 +48,7 @@ public class EmpleadoService {
 
         Empleado empleado = Empleado.builder()
                 .dni(request.getDni())
-                .nombres(request.getNombre())
+                .nombres(request.getNombres())
                 .apellidos(request.getApellidos())
                 .telefono(request.getTelefono())
                 .email(request.getEmail())
@@ -67,7 +67,7 @@ public class EmpleadoService {
                 .orElseThrow(() -> new ResourceNotFoundException("Empleado", "id", id));
 
         empleado.setDni(request.getDni());
-        empleado.setNombres(request.getNombre());
+        empleado.setNombres(request.getNombres());
         empleado.setApellidos(request.getApellidos());
         empleado.setTelefono(request.getTelefono());
         empleado.setEmail(request.getEmail());
@@ -91,7 +91,7 @@ public class EmpleadoService {
         return EmpleadoResponse.builder()
                 .id(empleado.getId())
                 .dni(empleado.getDni())
-                .nombre(empleado.getNombres())
+                .nombres(empleado.getNombres())
                 .apellidos(empleado.getApellidos())
                 .telefono(empleado.getTelefono())
                 .email(empleado.getEmail())
