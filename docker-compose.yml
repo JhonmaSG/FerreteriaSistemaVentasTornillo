@@ -1,0 +1,108 @@
+# =====================================================================
+# Ferreteria Tornillo - API de ventas
+# Uso:  docker compose up -d --build
+#       docker compose logs -f app
+#       docker compose down
+# =====================================================================
+
+services:
+
+  # -----------------------------------------------------------------
+  # Base de datos PostgreSQL
+  # -----------------------------------------------------------------
+  postgres:
+    image: postgres:16-alpine
+    container_name: ft-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_DB: ${DB_NAME:-bd_ventas}
+      POSTGRES_USER: ${DB_USERNAME:-postgres}
+      # Sin valor por defecto: si no se define en el .env, compose falla
+      # de inmediato en vez de arrancar con una credencial insegura.
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD es requerido (definelo en .env)}
+
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+    networks:
+      - ft-net
+
+    # NO se exponen puertos al host: la base de datos solo es accesible
+    # desde la red interna de Docker. Menos superficie de ataque.
+    expose:
+      - "5432"
+
+    healthcheck:
+      # pg_isready verifica que el servidor acepta conexiones. Es mas fiable
+      # que comprobar el puerto, porque el puerto abre antes de que la base
+      # de datos este lista para recibir queries.
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_NAME:-bd_ventas}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # -----------------------------------------------------------------
+  # Aplicacion Spring Boot
+  # -----------------------------------------------------------------
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ferreteria-tornillo:0.0.1-SNAPSHOT
+    container_name: ft-app
+    restart: unless-stopped
+
+    # La app solo arranca cuando la base de datos esta saludable.
+    # Sin esta condicion, la app puede fallar al iniciar si la BD aun no
+    # esta lista, y dependeria de reinicios manuales.
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    environment:
+      # Perfil de produccion: sin show-sql, logs estructurados, etc.
+      SPRING_PROFILES_ACTIVE: prod
+      # El host es el nombre del servicio en la red de Docker, no localhost.
+      DB_URL: jdbc:postgresql://postgres:5432/${DB_NAME:-bd_ventas}
+      DB_USERNAME: ${DB_USERNAME:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD es requerido (definelo en .env)}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET es requerido (definelo en .env)}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD es requerido (definelo en .env)}
+
+    ports:
+      - "${APP_PORT:-8080}:8080"
+
+    networks:
+      - ft-net
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/actuator/health || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      # Margen amplio: la app tarda en levantar el pool y crear el schema.
+      start_period: 60s
+
+    logging:
+      # Limitar el tamano de los logs evita que el disco del host se llene.
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  postgres-data:
+
+networks:
+  ft-net:
+    driver: bridge

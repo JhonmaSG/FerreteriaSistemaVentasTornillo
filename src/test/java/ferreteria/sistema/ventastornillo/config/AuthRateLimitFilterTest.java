@@ -37,6 +37,9 @@ class AuthRateLimitFilterTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+        // El DataLoader solo crea el admin si estas variables estan definidas.
+        registry.add("app.admin.username", () -> "admin");
+        registry.add("app.admin.password", () -> "admin123");
     }
 
     @Autowired

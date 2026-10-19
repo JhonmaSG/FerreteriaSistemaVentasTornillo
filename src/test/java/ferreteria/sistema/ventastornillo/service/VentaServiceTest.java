@@ -142,13 +142,33 @@ class VentaServiceTest {
         when(ventaRepository.findMaxNumeroSerie()).thenReturn(null);
         when(ventaRepository.save(any(Venta.class))).thenReturn(venta);
         when(productoRepository.save(any(Producto.class))).thenReturn(producto);
-        when(detalleVentaRepository.saveAll(anyList())).thenReturn(Collections.emptyList());
 
         VentaResponse resultado = ventaService.createVenta(ventaRequest);
 
         assertNotNull(resultado);
-        verify(ventaRepository, times(2)).save(any(Venta.class));
+        // La cabecera se persiste una sola vez: el monto y los detalles se
+        // calculan antes, porque monto es NOT NULL en la base de datos.
+        verify(ventaRepository, times(1)).save(any(Venta.class));
         verify(productoRepository, times(1)).save(any(Producto.class));
+    }
+
+    @Test
+    void createVenta_deberiaCalcularElMontoTotalAntesDePersistir() {
+        when(clienteRepository.findById(any())).thenReturn(Optional.of(cliente));
+        when(empleadoRepository.findById(any())).thenReturn(Optional.of(empleado));
+        when(productoRepository.findById(any())).thenReturn(Optional.of(producto));
+        when(ventaRepository.findMaxNumeroSerie()).thenReturn(null);
+        when(ventaRepository.save(any(Venta.class))).thenReturn(venta);
+        when(productoRepository.save(any(Producto.class))).thenReturn(producto);
+
+        ventaService.createVenta(ventaRequest);
+
+        // El monto debe estar calculado en el momento del save: 2 x 80000
+        org.mockito.ArgumentCaptor<Venta> captor = org.mockito.ArgumentCaptor.forClass(Venta.class);
+        verify(ventaRepository).save(captor.capture());
+
+        assertNotNull(captor.getValue().getMonto());
+        assertEquals(0, new BigDecimal("160000").compareTo(captor.getValue().getMonto()));
     }
 
     @Test

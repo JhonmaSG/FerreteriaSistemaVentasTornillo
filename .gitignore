@@ -17,12 +17,20 @@ target/
 hs_err_pid*
 replay_pid*
 
-# Environment variables
+# Environment variables / Secrets
+# Los secretos (contrasenas, claves JWT) NUNCA van en el repositorio.
 .env
 .env.local
 .env.*.local
+
+# Configuracion local: puede contener credenciales de la maquina del
+# desarrollador, por lo que se ignora.
 application-local.properties
-application-prod.properties
+
+# NOTA: application-prod.properties SI se versiona. Es configuracion no
+# sensible (niveles de log, show-sql, exposicion de endpoints) y debe estar
+# en el repositorio para que el despliegue sea reproducible. Los secretos
+# del perfil prod llegan por variables de entorno (ver .env.example).
 
 # ==================== INTELLIJ IDEA ====================
 .idea/

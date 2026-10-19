@@ -1,0 +1,48 @@
+# Contexto de build: solo se envia lo que la imagen necesita.
+# Cuanto menor el contexto, mas rapido es el build.
+
+# ==================== ARTEFACTOS DE BUILD ====================
+target/
+build/
+dist/
+out/
+
+# ==================== CONTROL DE VERSIONES ====================
+.git/
+.gitignore
+.gitattributes
+
+# ==================== SECRETOS ====================
+# El .env NUNCA debe entrar en la imagen ni en el historial de la imagen.
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.p12
+*.jks
+
+# ==================== IDE ====================
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+nbproject/
+nbbuild/
+.classpath
+.project
+.settings/
+
+# ==================== TESTS ====================
+# Los tests se ejecutan en el pipeline de CI, no dentro de la imagen.
+src/test/
+
+# ==================== DOCUMENTACION ====================
+*.md
+docs/
+HELP.md
+
+# ==================== SISTEMA OPERATIVO ====================
+.DS_Store
+Thumbs.db

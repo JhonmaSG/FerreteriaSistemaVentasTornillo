@@ -58,8 +58,10 @@ public class VentaService {
                 .activo(true)
                 .build();
 
-        Venta ventaGuardada = ventaRepository.save(venta);
-
+        // El total y los detalles se calculan ANTES de persistir la cabecera.
+        // Si se guardara la venta con el monto null, la columna "monto"
+        // (NOT NULL) rechazaria el INSERT. Ademas, al tener la cabecera el
+        // cascade ALL, los detalles se persisten en la misma operacion.
         List<DetalleVenta> detalles = new ArrayList<>();
         BigDecimal montoTotal = BigDecimal.ZERO;
 
@@ -78,7 +80,7 @@ public class VentaService {
             BigDecimal subtotal = precioVenta.multiply(BigDecimal.valueOf(detReq.getCantidad()));
 
             DetalleVenta detalle = DetalleVenta.builder()
-                    .venta(ventaGuardada)
+                    .venta(venta)
                     .producto(producto)
                     .cantidad(detReq.getCantidad())
                     .precioVenta(precioVenta)
@@ -86,16 +88,18 @@ public class VentaService {
                     .build();
 
             detalles.add(detalle);
+            venta.getDetalles().add(detalle);
             montoTotal = montoTotal.add(subtotal);
 
             producto.setStock(producto.getStock() - detReq.getCantidad());
             productoRepository.save(producto);
         }
 
-        detalleVentaRepository.saveAll(detalles);
+        venta.setMonto(montoTotal);
 
-        ventaGuardada.setMonto(montoTotal);
-        ventaRepository.save(ventaGuardada);
+        // Con cascade = ALL en la relacion, la cabecera y sus detalles se
+        // guardan en una sola operacion transaccional.
+        Venta ventaGuardada = ventaRepository.save(venta);
 
         return mapToResponse(ventaGuardada);
     }
