@@ -29,7 +29,7 @@ public class VentaService {
     private final DetalleVentaRepository detalleVentaRepository;
 
     @Transactional(readOnly = true)
-    public List<VentaResponse> listarTodos() {
+    public List<VentaResponse> getVentas() {
         return ventaRepository.findAll()
                 .stream()
                 .map(this::mapToResponse)
@@ -37,14 +37,14 @@ public class VentaService {
     }
 
     @Transactional(readOnly = true)
-    public VentaResponse obtenerPorId(UUID id) {
+    public VentaResponse getVentaId(UUID id) {
         Venta venta = ventaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venta", "id", id));
         return mapToResponse(venta);
     }
 
     @Transactional
-    public VentaResponse crear(VentaRequest request) {
+    public VentaResponse createVenta(VentaRequest request) {
         Cliente cliente = clienteRepository.findById(request.getClienteId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cliente", "id", request.getClienteId()));
 
@@ -101,7 +101,7 @@ public class VentaService {
     }
 
     @Transactional
-    public void eliminar(UUID id) {
+    public void deleteVenta(UUID id) {
         Venta venta = ventaRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Venta", "id", id));
         ventaRepository.delete(venta);

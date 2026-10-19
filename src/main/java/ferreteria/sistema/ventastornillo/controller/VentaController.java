@@ -21,24 +21,24 @@ public class VentaController {
 
     @GetMapping
     public ResponseEntity<List<VentaResponse>> getVentas() {
-        return ResponseEntity.ok(ventaService.listarTodos());
+        return ResponseEntity.ok(ventaService.getVentas());
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<VentaResponse> getVentaId(@PathVariable UUID id) {
-        return ResponseEntity.ok(ventaService.obtenerPorId(id));
+        return ResponseEntity.ok(ventaService.getVentaId(id));
     }
 
     @PostMapping
     public ResponseEntity<VentaResponse> createVenta(@Valid @RequestBody VentaRequest request) {
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(ventaService.crear(request));
+                .body(ventaService.createVenta(request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVenta(@PathVariable UUID id) {
-        ventaService.eliminar(id);
+        ventaService.deleteVenta(id);
         return ResponseEntity.noContent().build();
     }
 }
