@@ -106,7 +106,7 @@ class VentaServiceTest {
         when(ventaRepository.findAll()).thenReturn(Arrays.asList(venta));
         when(detalleVentaRepository.findByVentaId(any())).thenReturn(Collections.emptyList());
 
-        List<VentaResponse> resultado = ventaService.listarTodos();
+        List<VentaResponse> resultado = ventaService.getVentas();
 
         assertNotNull(resultado);
         assertEquals(1, resultado.size());
@@ -118,7 +118,7 @@ class VentaServiceTest {
         when(ventaRepository.findById(id)).thenReturn(Optional.of(venta));
         when(detalleVentaRepository.findByVentaId(id)).thenReturn(Collections.emptyList());
 
-        VentaResponse resultado = ventaService.obtenerPorId(id);
+        VentaResponse resultado = ventaService.getVentaId(id);
 
         assertNotNull(resultado);
         assertEquals("00000001", resultado.getNumeroSerie());
@@ -130,7 +130,7 @@ class VentaServiceTest {
         when(ventaRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            ventaService.obtenerPorId(id);
+            ventaService.getVentaId(id);
         });
     }
 
@@ -144,7 +144,7 @@ class VentaServiceTest {
         when(productoRepository.save(any(Producto.class))).thenReturn(producto);
         when(detalleVentaRepository.saveAll(anyList())).thenReturn(Collections.emptyList());
 
-        VentaResponse resultado = ventaService.crear(ventaRequest);
+        VentaResponse resultado = ventaService.createVenta(ventaRequest);
 
         assertNotNull(resultado);
         verify(ventaRepository, times(2)).save(any(Venta.class));
@@ -156,7 +156,7 @@ class VentaServiceTest {
         when(clienteRepository.findById(any())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            ventaService.crear(ventaRequest);
+            ventaService.createVenta(ventaRequest);
         });
     }
 
@@ -166,7 +166,7 @@ class VentaServiceTest {
         when(empleadoRepository.findById(any())).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> {
-            ventaService.crear(ventaRequest);
+            ventaService.createVenta(ventaRequest);
         });
     }
 
@@ -178,17 +178,17 @@ class VentaServiceTest {
         when(productoRepository.findById(any())).thenReturn(Optional.of(producto));
 
         assertThrows(BusinessException.class, () -> {
-            ventaService.crear(ventaRequest);
+            ventaService.createVenta(ventaRequest);
         });
     }
 
     @Test
-    void deleteVenta_deberiaEliminarVenta() {
+    void deleteVenta_deberiaDeleteVenta() {
         UUID id = venta.getId();
         when(ventaRepository.findById(id)).thenReturn(Optional.of(venta));
         doNothing().when(ventaRepository).delete(any(Venta.class));
 
-        ventaService.eliminar(id);
+        ventaService.deleteVenta(id);
 
         verify(ventaRepository, times(1)).delete(any(Venta.class));
     }

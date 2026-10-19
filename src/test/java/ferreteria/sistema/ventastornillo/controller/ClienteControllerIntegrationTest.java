@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-@Disabled("Requiere Docker - ejecutar manualmente cuando esté disponible")
+//@Disabled("Requiere Docker - ejecutar manualmente cuando esté disponible")
 class ClienteControllerIntegrationTest {
 
     @Container

@@ -16,7 +16,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 @AutoConfigureMockMvc
-@Disabled("Requiere Docker - ejecutar manualmente cuando esté disponible")
+//@Disabled("Requiere Docker - ejecutar manualmente cuando esté disponible")
 class SecurityTest {
 
     @Autowired
