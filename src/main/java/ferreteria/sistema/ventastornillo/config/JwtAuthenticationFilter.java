@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -31,7 +32,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         String token = getJwtFromRequest(request);
 
-        if(StringUtils.hasText(token) && jwtTokenProvider.validateToken(token)) {
+        // Si hay token pero es invalido (expirado, firma incorrecta, etc.) se rechaza
+        // inmediatamente con 401 en lugar de dejar que la request continue sin autenticar.
+        if (StringUtils.hasText(token) && !jwtTokenProvider.validateToken(token)) {
+            unauthorized(response, "Token JWT invalido o expirado");
+            return;
+        }
+
+        if (StringUtils.hasText(token)) {
             String username = jwtTokenProvider.getUsernameFromToken(token);
             List<String> roles = jwtTokenProvider.getRolesFromToken(token);
 
@@ -47,6 +55,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void unauthorized(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+        response.getWriter().write("{\"message\":\"" + message + "\"}");
     }
 
     private String getJwtFromRequest(HttpServletRequest request) {

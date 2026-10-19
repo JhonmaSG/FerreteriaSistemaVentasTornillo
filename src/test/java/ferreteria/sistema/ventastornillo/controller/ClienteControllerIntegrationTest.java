@@ -5,7 +5,6 @@ import ferreteria.sistema.ventastornillo.dto.request.LoginRequest;
 import ferreteria.sistema.ventastornillo.dto.response.ClienteResponse;
 import ferreteria.sistema.ventastornillo.dto.response.JwtResponse;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -73,11 +72,22 @@ class ClienteControllerIntegrationTest {
     }
 
     @Test
-    void listarClientes_sinToken_deberiaRetornar403() {
+    void listarClientes_sinToken_deberiaRetornar401() {
         ResponseEntity<String> response = restTemplate.getForEntity(
                 "/api/clientes", String.class);
 
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    void listarClientes_conTokenInvalido_deberiaRetornar401() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer token.invalido.firma");
+
+        ResponseEntity<String> response = restTemplate.exchange(
+                "/api/clientes", HttpMethod.GET, new HttpEntity<>(headers), String.class);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     @Test
@@ -102,18 +112,29 @@ class ClienteControllerIntegrationTest {
 
     @Test
     void crearCliente_conDniDuplicado_deberiaRetornar400() {
-        ClienteRequest cliente = ClienteRequest.builder()
-                .dni("12345678")
+        // El test es autocontenido: primero se crea el cliente original
+        ClienteRequest original = ClienteRequest.builder()
+                .dni("11111111")
                 .nombres("Juan")
                 .apellidos("Pérez")
                 .direccion("Av. Principal 123")
-                .email("juan2@email.com")
+                .email("juan.duplicado@email.com")
                 .build();
 
-        HttpEntity<ClienteRequest> request = new HttpEntity<>(cliente, createHeaders());
+        restTemplate.postForEntity(
+                "/api/clientes", new HttpEntity<>(original, createHeaders()), ClienteResponse.class);
+
+        // Luego se intenta crear otro cliente con el mismo DNI
+        ClienteRequest duplicado = ClienteRequest.builder()
+                .dni("11111111")
+                .nombres("Otro")
+                .apellidos("Cliente")
+                .direccion("Av. Otra 456")
+                .email("otro@email.com")
+                .build();
 
         ResponseEntity<String> response = restTemplate.postForEntity(
-                "/api/clientes", request, String.class);
+                "/api/clientes", new HttpEntity<>(duplicado, createHeaders()), String.class);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
