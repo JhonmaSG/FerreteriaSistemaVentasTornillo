@@ -1,6 +1,7 @@
 package ferreteria.sistema.ventastornillo.controller;
 
 import ferreteria.sistema.ventastornillo.config.JwtAuthenticationFilter;
+import ferreteria.sistema.ventastornillo.config.RateLimitProperties;
 import ferreteria.sistema.ventastornillo.dto.response.ClienteResponse;
 import ferreteria.sistema.ventastornillo.service.AuthService;
 import ferreteria.sistema.ventastornillo.service.ClienteService;
@@ -9,9 +10,11 @@ import ferreteria.sistema.ventastornillo.service.ProductoService;
 import ferreteria.sistema.ventastornillo.service.VentaService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,27 +26,28 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest
 @AutoConfigureMockMvc
+@EnableConfigurationProperties(RateLimitProperties.class)
 class SecurityTest {
 
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
+    @MockitoBean
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    @MockBean
+    @MockitoBean
     private AuthService authService;
 
-    @MockBean
+    @MockitoBean
     private ClienteService clienteService;
 
-    @MockBean
+    @MockitoBean
     private ProductoService productoService;
 
-    @MockBean
+    @MockitoBean
     private EmpleadoService empleadoService;
 
-    @MockBean
+    @MockitoBean
     private VentaService ventaService;
 
     @Test
