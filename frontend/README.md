@@ -29,7 +29,20 @@ npm run preview      # servir el build localmente
 npm run lint         # ESLint
 npm run format       # Prettier
 npm run format:check # verificar formato (para CI)
+npm run api:pull     # refrescar openapi.json desde el backend local
+npm run api:types    # regenerar src/api/schema.d.ts desde openapi.json
+npm run api:refresh  # ambos, en orden
 ```
+
+## Contrato de API
+
+`openapi.json` se versiona para que la generación de tipos no dependa de que el
+backend esté levantado (por ejemplo, en CI). Se refresca con `npm run api:refresh`
+y se commitea junto con `src/api/schema.d.ts`.
+
+Limitación actual del contrato: las operaciones documentan solo `200` y sin
+`required`, así que los tipos generados marcan todos los campos como opcionales,
+y los errores (`401`, `403`, `404`, `429`) se modelan a mano en el cliente.
 
 ## Estructura
 

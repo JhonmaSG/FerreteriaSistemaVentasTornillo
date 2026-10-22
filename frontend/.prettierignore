@@ -1,3 +1,8 @@
 dist
 node_modules
 package-lock.json
+
+# Artefactos generados: openapi.json lo escribe scripts/pull-openapi.mjs y
+# schema.d.ts lo genera openapi-typescript. No se formatean a mano.
+openapi.json
+src/api/schema.d.ts

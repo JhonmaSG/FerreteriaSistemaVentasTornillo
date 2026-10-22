@@ -9,6 +9,9 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
+    "api:pull": "node scripts/pull-openapi.mjs",
+    "api:types": "openapi-typescript openapi.json -o src/api/schema.d.ts",
+    "api:refresh": "npm run api:pull && npm run api:types",
     "preview": "vite preview"
   },
   "engines": {
@@ -38,11 +41,12 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
     "globals": "^17.13.0",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.9.10",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "shadcn": "^4.22.1",
     "tailwindcss": "^4.3.3",
-    "typescript": "~6.0.3",
+    "typescript": "~5.9.3",
     "typescript-eslint": "^8.71.2",
     "vite": "^8.3.4"
   }
