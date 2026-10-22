@@ -44,6 +44,14 @@ Limitación actual del contrato: las operaciones documentan solo `200` y sin
 `required`, así que los tipos generados marcan todos los campos como opcionales,
 y los errores (`401`, `403`, `404`, `429`) se modelan a mano en el cliente.
 
+## Capa API
+
+`src/api/client.ts` expone un cliente tipado con `openapi-fetch` sobre los tipos
+del contrato. `baseUrl` se toma de `VITE_API_URL`; vacío significa mismo origen.
+El middleware adjunta el token JWT cuando existe y convierte toda respuesta no
+exitosa en `ApiError` (`status`, `message`, `fieldErrors`, `retryAfterSeconds`,
+`correlationId`), definido en `src/api/errors.ts`.
+
 ## Estructura
 
 ```
