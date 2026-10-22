@@ -58,7 +58,7 @@ jobs:
       # de los tests fallidos desde la pagina del run.
       - name: Upload test reports
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports
           path: |
