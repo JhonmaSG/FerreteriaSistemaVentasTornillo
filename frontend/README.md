@@ -5,14 +5,15 @@ del mismo repositorio.
 
 ## Stack
 
-| Tecnología              | Uso                | Por qué                                           |
-| ----------------------- | ------------------ | ------------------------------------------------- |
-| React 19 + TypeScript 6 | UI y tipado        | Ecosistema amplio y tipos estrictos sin `any`     |
-| Vite 8                  | Build y dev server | Arranque y HMR rápidos; build estático simple     |
-| React Router 8          | Enrutado           | Rutas declarativas en modo librería, sin SSR      |
-| TanStack Query 5        | Estado de servidor | Caché, reintentos y estados de carga sin Redux    |
-| Tailwind CSS 4          | Estilos            | Utilidades con tokens de diseño, sin CSS huérfano |
-| shadcn/ui               | Componentes        | Código propio accesible, no una caja negra        |
+| Tecnología                | Uso                | Por qué                                           |
+| ------------------------- | ------------------ | ------------------------------------------------- |
+| React 19 + TypeScript 5.9 | UI y tipado        | Ecosistema amplio y tipos estrictos sin `any`     |
+| Vite 8                    | Build y dev server | Arranque y HMR rápidos; build estático simple     |
+| React Router 8            | Enrutado           | Rutas declarativas en modo librería, sin SSR      |
+| TanStack Query 5          | Estado de servidor | Caché, reintentos y estados de carga sin Redux    |
+| React Hook Form + Zod     | Formularios        | Validación declarativa y errores por campo        |
+| Tailwind CSS 4            | Estilos            | Utilidades con tokens de diseño, sin CSS huérfano |
+| shadcn/ui                 | Componentes        | Código propio accesible, no una caja negra        |
 
 ## Requisitos
 
@@ -76,11 +77,25 @@ src/
 
 Los imports internos usan el alias `@/`, que apunta a `src/`.
 
+## Autenticación
+
+El login llama a `POST /api/auth/login` y guarda `{ token, username, roles }` en
+`sessionStorage`: la sesión muere al cerrar la pestaña y el token no queda en
+`localStorage`. Es una decisión de MVP; en producción corresponde una cookie
+`httpOnly` con refresh token, fuera del alcance de JavaScript.
+
+`ProtectedRoute` envuelve las rutas privadas y conserva el destino original en
+`state.from`, de modo que el login devuelve al usuario donde quería entrar. Si
+cualquier respuesta es `401` (token vencido o revocado), el middleware del
+cliente limpia la sesión, emite `ft:unauthorized` y el `AuthProvider` cierra
+sesión y vacía la caché de TanStack Query para no mostrar datos del usuario
+anterior.
+
 ## Estado
 
-Etapas 1 y 2 completadas: scaffold, tooling, router, shell, contrato OpenAPI,
-cliente HTTP tipado, proxy y primera pantalla conectada.
+Etapas 1 a 3 completadas: scaffold, tooling, router, shell, contrato OpenAPI,
+cliente HTTP tipado, proxy, listado de productos y autenticación.
 
-`/productos` ya consulta la API y muestra estados de carga, error, vacío y datos.
-Como todos los endpoints exigen JWT, hoy la pantalla muestra el `401` del backend;
-la autenticación llega en la etapa 3.
+`/productos` es una ruta privada que muestra estados de carga, error, vacío y
+datos. El siguiente paso es el shell de la aplicación con el resto de módulos,
+el formato de moneda compartido y el manejo de `403/429`.

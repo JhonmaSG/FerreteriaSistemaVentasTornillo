@@ -1,9 +1,19 @@
-import { Link, NavLink, Outlet } from 'react-router'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router'
+import { useAuth } from '@/auth/context'
+import { Button } from '@/components/ui/button'
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
   isActive ? 'text-foreground' : 'transition-colors hover:text-foreground'
 
 export function RootLayout() {
+  const { isAuthenticated, session, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
   return (
     <div className="flex min-h-dvh flex-col bg-background text-foreground">
       <header className="border-b">
@@ -18,9 +28,18 @@ export function RootLayout() {
             <NavLink to="/productos" className={navLinkClass}>
               Productos
             </NavLink>
-            <NavLink to="/login" className={navLinkClass}>
-              Ingresar
-            </NavLink>
+            {isAuthenticated ? (
+              <>
+                <span className="hidden text-xs sm:inline">{session?.username}</span>
+                <Button variant="outline" size="sm" onClick={handleLogout}>
+                  Salir
+                </Button>
+              </>
+            ) : (
+              <NavLink to="/login" className={navLinkClass}>
+                Ingresar
+              </NavLink>
+            )}
           </nav>
         </div>
       </header>

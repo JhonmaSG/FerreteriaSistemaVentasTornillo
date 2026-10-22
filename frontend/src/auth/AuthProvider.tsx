@@ -1,10 +1,26 @@
-import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { api } from '@/api/client'
 import { AuthContext, type AuthContextValue } from './context'
-import { clearSession, loadSession, saveSession, type Session } from './session'
+import { clearSession, loadSession, saveSession, UNAUTHORIZED_EVENT, type Session } from './session'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(() => loadSession())
+  const queryClient = useQueryClient()
+
+  const logout = useCallback(() => {
+    clearSession()
+    // Los datos en caché pertenecen al usuario anterior: no deben sobrevivir
+    // al cierre de sesión ni a un token vencido.
+    queryClient.clear()
+    setSession(null)
+  }, [queryClient])
+
+  useEffect(() => {
+    window.addEventListener(UNAUTHORIZED_EVENT, logout)
+
+    return () => window.removeEventListener(UNAUTHORIZED_EVENT, logout)
+  }, [logout])
 
   const login = useCallback(async (username: string, password: string) => {
     const { data } = await api.POST('/api/auth/login', {
@@ -23,11 +39,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     saveSession(next)
     setSession(next)
-  }, [])
-
-  const logout = useCallback(() => {
-    clearSession()
-    setSession(null)
   }, [])
 
   const value = useMemo<AuthContextValue>(

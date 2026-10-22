@@ -2,6 +2,15 @@ import { setAuthToken } from '@/api/authToken'
 
 const STORAGE_KEY = 'ft.session'
 
+/**
+ * Evento que emite la capa HTTP cuando el backend responde 401.
+ *
+ * El cliente no conoce React, así que avisa por evento y el `AuthProvider`
+ * decide qué hacer (cerrar sesión, limpiar la caché y dejar que el guard
+ * redirija al login).
+ */
+export const UNAUTHORIZED_EVENT = 'ft:unauthorized'
+
 export interface Session {
   token: string
   username: string
