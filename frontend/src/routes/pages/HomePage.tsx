@@ -13,9 +13,14 @@ export function HomePage() {
         </p>
       </div>
 
-      <Button asChild>
-        <Link to="/login">Ir a ingreso</Link>
-      </Button>
+      <div className="flex flex-wrap gap-3">
+        <Button asChild>
+          <Link to="/productos">Ver productos</Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to="/login">Ir a ingreso</Link>
+        </Button>
+      </div>
     </section>
   )
 }

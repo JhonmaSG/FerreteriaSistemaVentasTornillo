@@ -15,6 +15,9 @@ export function RootLayout() {
             <NavLink to="/" end className={navLinkClass}>
               Inicio
             </NavLink>
+            <NavLink to="/productos" className={navLinkClass}>
+              Productos
+            </NavLink>
             <NavLink to="/login" className={navLinkClass}>
               Ingresar
             </NavLink>

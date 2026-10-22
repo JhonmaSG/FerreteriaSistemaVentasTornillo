@@ -78,5 +78,9 @@ Los imports internos usan el alias `@/`, que apunta a `src/`.
 
 ## Estado
 
-Etapa 1 completada: scaffold, tooling, router y shell. La app todavía no se
-comunica con el backend; el proxy de Vite y el cliente HTTP llegan en la etapa 2.
+Etapas 1 y 2 completadas: scaffold, tooling, router, shell, contrato OpenAPI,
+cliente HTTP tipado, proxy y primera pantalla conectada.
+
+`/productos` ya consulta la API y muestra estados de carga, error, vacío y datos.
+Como todos los endpoints exigen JWT, hoy la pantalla muestra el `401` del backend;
+la autenticación llega en la etapa 3.
