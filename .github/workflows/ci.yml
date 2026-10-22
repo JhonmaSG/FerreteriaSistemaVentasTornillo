@@ -1,0 +1,235 @@
+name: CI
+
+# Se ejecuta en cada push a main y en cada Pull Request.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Minimo privilegio por defecto. Solo el job de publicacion eleva permisos.
+permissions:
+  contents: read
+
+# Si se empuja dos veces seguidas al mismo branch, el run anterior se cancela:
+# no tiene sentido gastar minutos validando un commit que ya fue reemplazado.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  JAVA_VERSION: "17"
+  # GHCR exige nombres de repositorio en minusculas: no usar
+  # ${{ github.repository }} porque contiene mayusculas (JhonmaSG).
+  IMAGE_NAME: ghcr.io/jhonmasg/ferreteria-tornillo
+
+jobs:
+
+  # ===================================================================
+  # 1. Compilacion + tests
+  # ===================================================================
+  build-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          # Cache de ~/.m2/repository: la segunda ejecucion no descarga
+          # todas las dependencias de nuevo.
+          cache: maven
+
+      # Los tests unitarios no necesitan Docker ni base de datos.
+      - name: Unit tests (no Docker)
+        run: ./mvnw -B -ntp test
+
+      # Los tests de integracion levantan PostgreSQL con Testcontainers.
+      # "ubuntu-latest" ya trae Docker, por lo que no hay que configurar nada.
+      - name: Integration tests (Testcontainers)
+        run: ./mvnw -B -ntp failsafe:integration-test failsafe:verify
+
+      # Se suben siempre (incluso si fallan) para poder ver el detalle
+      # de los tests fallidos desde la pagina del run.
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: |
+            target/surefire-reports/
+            target/failsafe-reports/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # ===================================================================
+  # 2. Escaneo de secretos
+  # ===================================================================
+  secret-scan:
+    name: Secret scan (Gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@v4
+        with:
+          # Sin el historial completo, Gitleaks solo veria el ultimo commit
+          # y no detectaria secretos introducidos antes.
+          fetch-depth: 0
+
+      # Se usa el binario oficial en lugar de gitleaks-action porque la
+      # action tiene licencia comercial para organizaciones. El binario es
+      # MIT y ademas se verifica su checksum SHA-256 (supply chain).
+      - name: Install Gitleaks v8.30.1 (checksum verified)
+        run: |
+          curl -sSfL -o gitleaks.tar.gz \
+            https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+          echo "551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+          rm -f gitleaks.tar.gz gitleaks
+
+      - name: Run Gitleaks (blocking)
+        # --redact evita imprimir el secreto encontrado en los logs.
+        # --exit-code 1 hace fallar el job si hay hallazgos.
+        run: gitleaks detect --source . --verbose --redact --exit-code 1
+
+  # ===================================================================
+  # 3. Escaneo de dependencias
+  # ===================================================================
+  dependency-scan:
+    name: Dependency scan (Trivy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+          cache: maven
+
+      # Se construye el JAR real que se despliega y se escanea ese artefacto.
+      # Escanear el pom.xml por separado no resuelve bien las dependencias
+      # transitivas; el fat JAR contiene exactamente lo que va a produccion.
+      - name: Build artifact
+        run: ./mvnw -B -ntp -Dmaven.test.skip=true package
+
+      # IMPORTANTE: se usa "rootfs", no "fs". El modo "fs" esta pensado
+      # para lockfiles (package-lock.json, pom.xml, etc.) y NO analiza
+      # archivos JAR: reporta "0 language-specific files" y el job pasaria
+      # sin escanear nada (falso negativo). "rootfs" si descomprime el fat
+      # JAR y revisa cada dependencia de BOOT-INF/lib.
+      - name: Trivy scan on artifact (blocking)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: rootfs
+          scan-ref: target
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+          # Excepciones documentadas y con caducidad (ver .trivyignore.yaml).
+          trivyignores: .trivyignore.yaml
+
+  # ===================================================================
+  # 4. Build de la imagen + escaneo de la imagen
+  # ===================================================================
+  docker-build:
+    name: Docker build and image scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    # Solo se construye la imagen si el codigo, los secretos y las
+    # dependencias pasaron. Evita gastar tiempo en un commit invalido.
+    needs: [build-test, secret-scan, dependency-scan]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: ferreteria-tornillo:ci
+          # Cache de capas en GitHub Actions: reutiliza las capas de runs
+          # anteriores y evita recompilar todo el proyecto.
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # Las atestaciones no son compatibles con load: true.
+          provenance: false
+
+      - name: Trivy image scan (blocking)
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: image
+          image-ref: ferreteria-tornillo:ci
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+          # Mismas excepciones que el escaneo del artefacto.
+          trivyignores: .trivyignore.yaml
+
+  # ===================================================================
+  # 5. Publicacion en GHCR (solo en main)
+  # ===================================================================
+  publish:
+    name: Publish image to GHCR
+    # En Pull Requests no se publica nada: solo se valida.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [docker-build]
+    permissions:
+      contents: read
+      # Necesario para empujar la imagen a GitHub Container Registry.
+      packages: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          # GITHUB_TOKEN es efimero y lo genera GitHub en cada run:
+          # no hay que configurar ningun secret manual.
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=sha-
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          # SBOM y provenance: permiten auditar que contiene la imagen y
+          # como fue construida (supply chain).
+          provenance: true
+          sbom: true

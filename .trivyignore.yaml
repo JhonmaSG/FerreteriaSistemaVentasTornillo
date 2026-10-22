@@ -1,0 +1,25 @@
+# ============================================================================
+# Excepciones de seguridad revisadas manualmente.
+#
+# Cada entrada tiene fecha de caducidad: cuando vence, Trivy vuelve a
+# reportar el CVE y el pipeline falla, obligando a revisar la decision.
+# No se usa para "silenciar" hallazgos: solo para riesgos verificados como
+# no explotables en esta aplicacion y sin parche disponible en la linea OSS.
+# ============================================================================
+vulnerabilities:
+  - id: CVE-2026-47884
+    statement: >-
+      Spring Framework 6.2.20 (unico parche para la linea 6.2) es Enterprise
+      Support Only. Esta aplicacion es una API REST sin renderizado de vistas:
+      no usa Thymeleaf, JSP ni XSLT, no tiene mapeos "/**" que rendericen
+      vistas y XsltView no esta en el classpath. La ruta vulnerable es
+      inalcanzable. Ruta de salida: Spring Boot 4.0.x (Framework 7.0.9+).
+    expired_at: 2026-12-31
+
+  - id: CVE-2026-47890
+    statement: >-
+      Spring Framework 6.2.20 (unico parche para la linea 6.2) es Enterprise
+      Support Only. La aplicacion no usa Server-Sent Events ni fragmentos de
+      vista, por lo que la ruta vulnerable es inalcanzable.
+      Ruta de salida: Spring Boot 4.0.x (Framework 7.0.9+).
+    expired_at: 2026-12-31

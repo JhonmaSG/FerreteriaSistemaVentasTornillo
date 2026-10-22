@@ -1,0 +1,42 @@
+version: 2
+
+# Dependabot abre Pull Requests automaticos con actualizaciones.
+# Cada PR pasa por el workflow de CI antes de poder mergearse.
+updates:
+
+  # Dependencias de Maven (pom.xml)
+  - package-ecosystem: maven
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      # Spring Boot y Spring Framework se actualizan juntos: sus versiones
+      # estan acopladas y actualizarlas por separado rompe el build.
+      spring:
+        patterns:
+          - "org.springframework*"
+      testing:
+        patterns:
+          - "org.junit*"
+          - "org.mockito*"
+          - "org.testcontainers*"
+
+  # Actions usadas en .github/workflows
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(ci)"
+
+  # Imagen base del Dockerfile (eclipse-temurin y maven)
+  - package-ecosystem: docker
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore(docker)"

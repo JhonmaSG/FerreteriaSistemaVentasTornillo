@@ -1,5 +1,7 @@
 # Sistema Ventas - Ferreteria Tornillo
 
+![CI](https://github.com/JhonmaSG/FerreteriaSistemaVentasTornillo/actions/workflows/ci.yml/badge.svg)
+
 API REST para la gestión de ventas de una ferretería: clientes, productos, empleados y registro de ventas con control de stock.
 
 Proyecto de portafolio construido como evolución de un sistema legacy (JSP + Servlets + JDBC + MySQL) hacia un stack moderno con Spring Boot.
@@ -9,10 +11,10 @@ Proyecto de portafolio construido como evolución de un sistema legacy (JSP + Se
 | Componente | Tecnología |
 |---|---|
 | Lenguaje | Java 17 |
-| Framework | Spring Boot 3.5.5 |
+| Framework | Spring Boot 3.5.16 |
 | Base de datos | PostgreSQL 16 |
-| ORM | Spring Data JPA / Hibernate 7 |
-| Seguridad | Spring Security 6 + JWT (jjwt 0.12.6) |
+| ORM | Spring Data JPA / Hibernate 6.6 |
+| Seguridad | Spring Security 6.5 + JWT (jjwt 0.12.6) |
 | Migraciones / Schema | Hibernate `ddl-auto` (pendiente: Flyway) |
 | Documentación API | OpenAPI 3 / Swagger UI (springdoc) |
 | Rate limiting | Bucket4j 8.21 |
@@ -85,13 +87,56 @@ cp .env.example .env
 
 ## Testing
 
+Los tests están separados por convención de Maven:
+
+| Comando | Qué ejecuta | Requiere Docker |
+|---|---|---|
+| `./mvnw test` | Solo unitarios (`*Test`) | No |
+| `./mvnw verify` | Unitarios + integración (`*IT`) | Sí |
+
 ```bash
-./mvnw test                        # Toda la suite
-./mvnw test -Dtest=*ServiceTest    # Solo tests unitarios
-./mvnw test -Dtest=*IntegrationTest # Solo tests de integración (requiere Docker)
+./mvnw test                                 # Unitarios (rápido, sin Docker)
+./mvnw verify                               # Suite completa (unitarios + integración)
+./mvnw test -Dtest=ClienteServiceTest       # Un test unitario concreto
+./mvnw verify -Dit.test=ClienteControllerIT # Un test de integración concreto
 ```
 
-Los tests de integración usan **Testcontainers**: levantan un PostgreSQL real en un contenedor, de modo que se validan las restricciones de la base de datos (NOT NULL, UNIQUE, FK) que los mocks no pueden detectar.
+**Surefire** ejecuta los `*Test` y **Failsafe** los `*IT`, de modo que `mvn test` nunca falla por no tener Docker levantado. Los tests de integración usan **Testcontainers**: levantan un PostgreSQL real en un contenedor, de modo que se validan las restricciones de la base de datos (NOT NULL, UNIQUE, FK) que los mocks no pueden detectar.
+
+## CI/CD
+
+El pipeline (`.github/workflows/ci.yml`) se ejecuta en cada push a `main` y en cada Pull Request. Los jobs de validación son **bloqueantes**: si fallan, el merge no debería permitirse.
+
+| Job | Qué valida | Bloqueante |
+|---|---|---|
+| `Build and test` | Compila, corre unitarios y integración con Testcontainers | Sí |
+| `Secret scan` | Gitleaks sobre todo el historial de Git | Sí |
+| `Dependency scan` | Trivy sobre el fat JAR (CVEs corregibles CRITICAL/HIGH) | Sí |
+| `Docker build and image scan` | Construye la imagen y escanea SO + dependencias | Sí |
+| `Publish image to GHCR` | Publica la imagen (solo en `main`, nunca en PRs) | — |
+
+**Reproducir el pipeline en local:**
+
+```bash
+./mvnw verify
+gitleaks detect --source . --verbose --redact
+docker build -t ferreteria-tornillo:ci .
+```
+
+**Imagen publicada** (solo tras un push a `main`):
+
+```bash
+docker pull ghcr.io/jhonmasg/ferreteria-tornillo:latest
+docker pull ghcr.io/jhonmasg/ferreteria-tornillo:sha-<commit>
+```
+
+**Escaneo de dependencias:** se usa Trivy en modo `rootfs`, no `fs`. El modo `fs` está pensado para lockfiles y no analiza JARs (reporta `0 language-specific files`), lo que produciría un falso negativo. `rootfs` descomprime el fat JAR y revisa cada dependencia de `BOOT-INF/lib`.
+
+**Excepciones de seguridad:** `.trivyignore.yaml` contiene únicamente riesgos verificados como no explotables y **con fecha de caducidad**. Al vencer, el CVE vuelve a bloquear el pipeline y obliga a revisar la decisión. Actualmente hay dos CVEs de Spring Framework 6.2 cuyo parche solo existe en la línea Enterprise 6.2.20; el código vulnerable (XsltView y SSE con fragmentos de vista) no se usa en esta API REST. La ruta de salida es Spring Boot 4.0.x (Framework 7.0.9+).
+
+**Dependabot** (`.github/dependabot.yml`) abre PRs semanales para Maven, GitHub Actions y la imagen Docker. Cada PR pasa por el mismo pipeline antes de poder mergearse.
+
+**Protección de `main` recomendada** (Settings → Branches): exigir Pull Request, exigir que pasen los checks `Build and test`, `Secret scan`, `Dependency scan` y `Docker build and image scan`, y prohibir el push directo.
 
 ## Autenticación
 
