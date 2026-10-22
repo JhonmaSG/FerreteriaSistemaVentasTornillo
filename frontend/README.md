@@ -1,73 +1,54 @@
-# React + TypeScript + Vite
+# Ferretería Tornillo — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web del sistema de ventas. Consume la API REST del backend Spring Boot
+del mismo repositorio.
 
-Currently, two official plugins are available:
+## Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+| Tecnología              | Uso                | Por qué                                           |
+| ----------------------- | ------------------ | ------------------------------------------------- |
+| React 19 + TypeScript 6 | UI y tipado        | Ecosistema amplio y tipos estrictos sin `any`     |
+| Vite 8                  | Build y dev server | Arranque y HMR rápidos; build estático simple     |
+| React Router 8          | Enrutado           | Rutas declarativas en modo librería, sin SSR      |
+| TanStack Query 5        | Estado de servidor | Caché, reintentos y estados de carga sin Redux    |
+| Tailwind CSS 4          | Estilos            | Utilidades con tokens de diseño, sin CSS huérfano |
+| shadcn/ui               | Componentes        | Código propio accesible, no una caja negra        |
 
-## React Compiler
+## Requisitos
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Node.js >= 22.12 (lo exige el paquete `cn` que usa shadcn 4)
+- npm >= 10
 
-## Expanding the ESLint configuration
+## Comandos
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install          # instalar dependencias
+npm run dev          # servidor de desarrollo en http://localhost:5173
+npm run build        # type-check (tsc -b) + build de producción
+npm run preview      # servir el build localmente
+npm run lint         # ESLint
+npm run format       # Prettier
+npm run format:check # verificar formato (para CI)
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## Estructura
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+src/
+  api/                 Cliente HTTP y tipos generados desde OpenAPI (etapa 2)
+  auth/                Sesión, token y guards de rutas (etapa 3)
+  components/
+    ui/                Componentes generados por shadcn/ui
+    layout/            Shell de la aplicación (header, navegación)
+    common/            Componentes compartidos entre dominios
+  features/<dominio>/  Productos, clientes, empleados y ventas
+  lib/                 Utilidades y configuración (queryClient, cn)
+  routes/              Router y páginas de entrada
+```
+
+Los imports internos usan el alias `@/`, que apunta a `src/`.
+
+## Estado
+
+Etapa 1 completada: scaffold, tooling, router y shell. La app todavía no se
+comunica con el backend; el proxy de Vite y el cliente HTTP llegan en la etapa 2.
