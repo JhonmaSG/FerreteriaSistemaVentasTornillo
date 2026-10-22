@@ -9,4 +9,12 @@ export default defineConfig({
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
+  server: {
+    proxy: {
+      // El cliente llama a rutas relativas (/api/...) y Vite las reenvía al
+      // backend local. Como el navegador solo habla con el dev server, no
+      // hace falta CORS. En producción Nginx cumple el mismo papel.
+      '/api': { target: 'http://localhost:8080' },
+    },
+  },
 })

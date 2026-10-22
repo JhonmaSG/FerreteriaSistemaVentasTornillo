@@ -34,6 +34,13 @@ npm run api:types    # regenerar src/api/schema.d.ts desde openapi.json
 npm run api:refresh  # ambos, en orden
 ```
 
+## Entorno
+
+Copia `.env.example` a `.env` solo si necesitas apuntar a otra API; el valor por
+defecto (vacío) funciona con el proxy de Vite en desarrollo y con Nginx en
+producción. Los archivos `.env` no se versionan y no deben contener secretos:
+todo lo que empieza por `VITE_` termina dentro del bundle.
+
 ## Contrato de API
 
 `openapi.json` se versiona para que la generación de tipos no dependa de que el
