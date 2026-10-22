@@ -130,13 +130,15 @@ docker pull ghcr.io/jhonmasg/ferreteria-tornillo:latest
 docker pull ghcr.io/jhonmasg/ferreteria-tornillo:sha-<commit>
 ```
 
+La imagen es pública: no requiere `docker login` para descargarla.
+
 **Escaneo de dependencias:** se usa Trivy en modo `rootfs`, no `fs`. El modo `fs` está pensado para lockfiles y no analiza JARs (reporta `0 language-specific files`), lo que produciría un falso negativo. `rootfs` descomprime el fat JAR y revisa cada dependencia de `BOOT-INF/lib`.
 
 **Excepciones de seguridad:** `.trivyignore.yaml` contiene únicamente riesgos verificados como no explotables y **con fecha de caducidad**. Al vencer, el CVE vuelve a bloquear el pipeline y obliga a revisar la decisión. Actualmente hay dos CVEs de Spring Framework 6.2 cuyo parche solo existe en la línea Enterprise 6.2.20; el código vulnerable (XsltView y SSE con fragmentos de vista) no se usa en esta API REST. La ruta de salida es Spring Boot 4.0.x (Framework 7.0.9+).
 
 **Dependabot** (`.github/dependabot.yml`) abre PRs semanales para Maven, GitHub Actions y la imagen Docker. Cada PR pasa por el mismo pipeline antes de poder mergearse.
 
-**Protección de `main` recomendada** (Settings → Branches): exigir Pull Request, exigir que pasen los checks `Build and test`, `Secret scan`, `Dependency scan` y `Docker build and image scan`, y prohibir el push directo.
+**Protección de `main` recomendada** (Settings → Branches): exigir Pull Request, exigir que pasen los checks `Build and test`, `Secret scan (Gitleaks)`, `Dependency scan (Trivy)` y `Docker build and image scan`, y prohibir el push directo.
 
 ## Autenticación
 
