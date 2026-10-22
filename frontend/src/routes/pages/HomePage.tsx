@@ -7,9 +7,9 @@ export function HomePage() {
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Sistema de ventas</h1>
         <p className="max-w-prose text-muted-foreground">
-          Base del frontend: enrutado con React Router, estado de servidor con
-          TanStack Query y componentes con shadcn/ui. Las pantallas de productos,
-          clientes, empleados y ventas llegan en las siguientes etapas.
+          Base del frontend: enrutado con React Router, estado de servidor con TanStack Query y
+          componentes con shadcn/ui. Las pantallas de productos, clientes, empleados y ventas llegan
+          en las siguientes etapas.
         </p>
       </div>
 
