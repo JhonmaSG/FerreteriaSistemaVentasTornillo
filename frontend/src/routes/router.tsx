@@ -7,7 +7,7 @@ import { NotFoundPage } from '@/routes/pages/NotFoundPage'
 import { ProductosPage } from '@/routes/pages/ProductosPage'
 import { ClientesPage } from '@/routes/pages/ClientesPage'
 import { EmpleadosPage } from '@/routes/pages/EmpleadosPage'
-import { ModulePlaceholderPage } from '@/components/common/ModulePlaceholderPage'
+import { VentasPage } from '@/routes/pages/VentasPage'
 
 export const router = createBrowserRouter([
   {
@@ -22,7 +22,7 @@ export const router = createBrowserRouter([
           { path: 'productos', element: <ProductosPage /> },
           { path: 'clientes', element: <ClientesPage /> },
           { path: 'empleados', element: <EmpleadosPage /> },
-          { path: 'ventas', element: <ModulePlaceholderPage title="Ventas" /> },
+          { path: 'ventas', element: <VentasPage /> },
         ],
       },
       { path: '*', element: <NotFoundPage /> },
