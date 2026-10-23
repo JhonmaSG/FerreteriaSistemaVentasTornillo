@@ -5,6 +5,8 @@ import { HomePage } from '@/routes/pages/HomePage'
 import { LoginPage } from '@/routes/pages/LoginPage'
 import { NotFoundPage } from '@/routes/pages/NotFoundPage'
 import { ProductosPage } from '@/routes/pages/ProductosPage'
+import { ClientesPage } from '@/routes/pages/ClientesPage'
+import { EmpleadosPage } from '@/routes/pages/EmpleadosPage'
 import { ModulePlaceholderPage } from '@/components/common/ModulePlaceholderPage'
 
 export const router = createBrowserRouter([
@@ -18,8 +20,8 @@ export const router = createBrowserRouter([
         element: <ProtectedRoute />,
         children: [
           { path: 'productos', element: <ProductosPage /> },
-          { path: 'clientes', element: <ModulePlaceholderPage title="Clientes" /> },
-          { path: 'empleados', element: <ModulePlaceholderPage title="Empleados" /> },
+          { path: 'clientes', element: <ClientesPage /> },
+          { path: 'empleados', element: <EmpleadosPage /> },
           { path: 'ventas', element: <ModulePlaceholderPage title="Ventas" /> },
         ],
       },
