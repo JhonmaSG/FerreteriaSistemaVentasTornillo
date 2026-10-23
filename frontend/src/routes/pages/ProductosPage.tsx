@@ -1,6 +1,5 @@
-import { ApiError } from '@/api/errors'
 import type { Producto } from '@/api/types'
-import { Button } from '@/components/ui/button'
+import { ApiErrorAlert } from '@/components/common/ApiErrorAlert'
 import { Skeleton } from '@/components/ui/skeleton'
 import {
   Table,
@@ -25,7 +24,7 @@ export function ProductosPage() {
 
       {isPending ? <ProductosSkeleton /> : null}
       {isError ? (
-        <ProductosError error={error} onRetry={() => refetch()} retrying={isFetching} />
+        <ApiErrorAlert error={error} onRetry={() => refetch()} retrying={isFetching} />
       ) : null}
       {data && data.length === 0 ? <ProductosEmpty /> : null}
       {data && data.length > 0 ? <ProductosTable productos={data} /> : null}
@@ -75,41 +74,5 @@ function ProductosEmpty() {
     <p className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
       No hay productos registrados.
     </p>
-  )
-}
-
-interface ProductosErrorProps {
-  error: Error
-  onRetry: () => void
-  retrying: boolean
-}
-
-function ProductosError({ error, onRetry, retrying }: ProductosErrorProps) {
-  const apiError = error instanceof ApiError ? error : undefined
-  const isUnauthorized = apiError?.status === 401
-
-  return (
-    <div
-      role="alert"
-      className="space-y-3 rounded-lg border border-destructive/40 bg-destructive/5 p-4"
-    >
-      <p className="font-medium">No se pudieron cargar los productos</p>
-      <p className="text-sm text-muted-foreground">
-        {apiError?.message ?? 'Ocurrió un error inesperado al consultar la API.'}
-      </p>
-      {isUnauthorized ? (
-        <p className="text-sm text-muted-foreground">
-          Inicia sesión para consultar el inventario. El formulario de acceso llega en la etapa 3.
-        </p>
-      ) : null}
-      {apiError?.correlationId ? (
-        <p className="font-mono text-xs text-muted-foreground">
-          Correlation ID: {apiError.correlationId}
-        </p>
-      ) : null}
-      <Button variant="outline" size="sm" onClick={onRetry} disabled={retrying}>
-        {retrying ? 'Reintentando…' : 'Reintentar'}
-      </Button>
-    </div>
   )
 }
