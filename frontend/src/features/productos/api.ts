@@ -1,5 +1,5 @@
 import { api } from '@/api/client'
-import type { Producto } from '@/api/types'
+import type { Producto, ProductoRequest } from '@/api/types'
 
 /**
  * Listado de productos.
@@ -12,4 +12,38 @@ export async function getProductos(): Promise<Producto[]> {
   const { data } = await api.GET('/api/productos')
 
   return data ?? []
+}
+
+export async function getProducto(id: string): Promise<Producto | undefined> {
+  const { data } = await api.GET('/api/productos/{id}', {
+    params: { path: { id } },
+  })
+
+  return data
+}
+
+export async function createProducto(body: ProductoRequest): Promise<Producto | undefined> {
+  const { data } = await api.POST('/api/productos', {
+    body,
+  })
+
+  return data
+}
+
+export async function updateProducto(
+  id: string,
+  body: ProductoRequest,
+): Promise<Producto | undefined> {
+  const { data } = await api.PUT('/api/productos/{id}', {
+    params: { path: { id } },
+    body,
+  })
+
+  return data
+}
+
+export async function deleteProducto(id: string): Promise<void> {
+  await api.DELETE('/api/productos/{id}', {
+    params: { path: { id } },
+  })
 }
