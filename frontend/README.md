@@ -93,9 +93,9 @@ anterior.
 
 ## Estado
 
-Etapas 1 a 3 completadas: scaffold, tooling, router, shell, contrato OpenAPI,
-cliente HTTP tipado, proxy, listado de productos y autenticación.
+Etapas 1 a 7 completadas: scaffold, tooling, router, shell, contrato OpenAPI,
+cliente HTTP tipado, proxy, autenticación, CRUD de Productos/Clientes/Empleados
+y módulo de Ventas.
 
-`/productos` es una ruta privada que muestra estados de carga, error, vacío y
-datos. El siguiente paso es el shell de la aplicación con el resto de módulos,
-el formato de moneda compartido y el manejo de `403/429`.
+La aplicación cubre el flujo principal de ventas del sistema. Pendiente pulido
+y CI (Etapa 8).

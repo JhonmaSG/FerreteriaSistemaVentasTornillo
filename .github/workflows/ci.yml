@@ -142,6 +142,36 @@ jobs:
   # ===================================================================
   # 4. Build de la imagen + escaneo de la imagen
   # ===================================================================
+  frontend-lint:
+    name: Frontend lint, typecheck and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check formatting
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+
   docker-build:
     name: Docker build and image scan
     runs-on: ubuntu-latest
