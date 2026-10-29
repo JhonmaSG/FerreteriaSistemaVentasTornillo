@@ -29,7 +29,7 @@ RUN mvn -B -q clean package -DskipTests
 # (glibc). Reduce la imagen base de ~570MB a ~270MB. El trade-off: algunas
 # librerias nativas con binarios precompilados para glibc no funcionarian,
 # pero el stack usado aqui (Tomcat, JDBC, PostgreSQL) es puro Java.
-FROM eclipse-temurin:17-jre-alpine AS runtime
+FROM eclipse-temurin:25-jre-alpine AS runtime
 
 # curl se usa para el HEALTHCHECK. --no-cache evita cachear los indices
 # de apk y el directorio /var/cache queda limpio.
